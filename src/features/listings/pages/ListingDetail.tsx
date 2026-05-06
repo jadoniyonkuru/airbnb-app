@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 import { FaStar, FaMapMarkerAlt, FaArrowLeft } from 'react-icons/fa';
 import { useStore } from '../../../store/storeContext';
 import { useFavorites } from '../hooks/useFavorites';
+import BookingForm from '../../bookings/components/BookingForm';
 
 export default function ListingDetail() {
   // Extract the id from the URL e.g. /listings/3 → id = "3"
@@ -11,6 +13,9 @@ export default function ListingDetail() {
   const navigate = useNavigate();
   const { state } = useStore();
   const { isSaved, toggle } = useFavorites();
+
+  // Local state — only controls booking form visibility
+  const [showBooking, setShowBooking] = useState(false);
 
   // Find the matching listing — convert id string to number first
   const listing = state.listings.find((l) => l.id === Number(id));
@@ -40,8 +45,15 @@ export default function ListingDetail() {
   }
 
   const {
-    title, location, price, rating,
-    superhost, available, availableFrom, img, category
+    title,
+    location,
+    price,
+    rating,
+    superhost,
+    available,
+    availableFrom,
+    img,
+    category,
   } = listing;
 
   return (
@@ -86,9 +98,11 @@ export default function ListingDetail() {
         alignItems: 'flex-start',
         marginBottom: '12px',
       }}>
-        <h1 style={{ color: '#222', margin: 0, fontSize: '1.8rem' }}>{title}</h1>
+        <h1 style={{ color: '#222', margin: 0, fontSize: '1.8rem' }}>
+          {title}
+        </h1>
 
-        {/* Save button on detail page */}
+        {/* Save button — reads from store via useFavorites */}
         <button
           onClick={() => toggle(listing.id, title)}
           style={{
@@ -99,6 +113,7 @@ export default function ListingDetail() {
             color: isSaved(listing.id) ? '#fff' : '#ff385c',
             fontWeight: 600,
             cursor: 'pointer',
+            whiteSpace: 'nowrap',
           }}
         >
           {isSaved(listing.id) ? '❤️ Saved' : '🤍 Save'}
@@ -117,20 +132,20 @@ export default function ListingDetail() {
         {location}
       </div>
 
-      {/* Meta row */}
+      {/* Meta row — rating, price, category */}
       <div style={{
         display: 'flex',
         gap: '24px',
         flexWrap: 'wrap',
         marginBottom: '24px',
       }}>
-        {/* Rating */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <FaStar color="#ff385c" />
-          <span style={{ fontWeight: 600 }}>{numeral(rating).format('0.00')}</span>
+          <span style={{ fontWeight: 600 }}>
+            {numeral(rating).format('0.00')}
+          </span>
         </div>
 
-        {/* Price */}
         <div>
           <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>
             {numeral(price).format('$0,0')}
@@ -138,7 +153,6 @@ export default function ListingDetail() {
           <span style={{ color: '#717171' }}> / night</span>
         </div>
 
-        {/* Category */}
         <span style={{
           padding: '4px 12px',
           borderRadius: '20px',
@@ -152,7 +166,12 @@ export default function ListingDetail() {
       </div>
 
       {/* Badges */}
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+      <div style={{
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap',
+        marginBottom: '24px',
+      }}>
         {superhost && (
           <span style={{
             padding: '4px 12px',
@@ -166,7 +185,6 @@ export default function ListingDetail() {
           </span>
         )}
 
-        {/* availability badge */}
         <span style={{
           padding: '4px 12px',
           borderRadius: '20px',
@@ -198,6 +216,7 @@ export default function ListingDetail() {
         background: '#f7f7f7',
         borderRadius: '12px',
         color: '#444',
+        marginBottom: '24px',
       }}>
         <p style={{ margin: 0, fontWeight: 600 }}>Available from</p>
         <p style={{ margin: '4px 0 0', fontSize: '1.1rem', color: '#222' }}>
@@ -205,6 +224,31 @@ export default function ListingDetail() {
           {dayjs(availableFrom).format('MMMM D, YYYY')}
         </p>
       </div>
+
+      {/* Book Now button — toggles booking form visibility */}
+      <button
+        onClick={() => setShowBooking((prev) => !prev)}
+        style={{
+          width: '100%',
+          padding: '14px',
+          borderRadius: '12px',
+          background: '#ff385c',
+          color: '#fff',
+          border: 'none',
+          fontWeight: 700,
+          fontSize: '1.1rem',
+          cursor: 'pointer',
+        }}
+      >
+        {showBooking ? 'Hide Booking Form' : 'Book Now'}
+      </button>
+
+      {/* Booking form — renders below button when showBooking is true */}
+      {showBooking && (
+        <div style={{ marginTop: '24px' }}>
+          <BookingForm />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import { useStore } from '../../../store/StoreContext';
+import { useStore } from '../../../store/storeContext';
 
 export function useFavorites() {
   const { state, dispatch } = useStore();

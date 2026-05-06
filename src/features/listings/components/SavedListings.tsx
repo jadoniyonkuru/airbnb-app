@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Transition } from '@headlessui/react';
-import { useStore } from '../../../store/StoreContext';
+import { useStore } from '../../../store/storeContext';
 import { useFavorites } from '../hooks/useFavorites';
 import numeral from 'numeral';
 

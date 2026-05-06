@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
-import { useStore } from '../../../store/StoreContext';
+import { useStore } from '../../../store/storeContext';
 
 export default function SearchBar() {
   const { dispatch } = useStore();
