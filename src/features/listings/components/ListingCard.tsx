@@ -1,9 +1,10 @@
+import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { FaHeart, FaRegHeart, FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 import numeral from 'numeral';
 import { Listing } from '../types';
-import './ListingCard.css';
+import styles from './ListingCard.module.css';
 
 interface ListingCardProps {
   listing: Listing;
@@ -12,68 +13,71 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing, saved, onToggleSave }: ListingCardProps) {
-  const {
-    title,
-    location,
-    price,
-    rating,
-    superhost,
-    available,
-    availableFrom,
-    img,
-  } = listing;
+  const { title, location, price, rating, superhost, available, availableFrom, img } = listing;
 
   return (
-    <div
-      className={clsx('card', {
-        'card--saved': saved,
-        'card--luxury': price > 300,
-        'card--booked': !available,
+    // motion.div replaces plain div — framer-motion handles the animation
+    // initial = starting state (invisible, shifted down 20px)
+    // animate = end state (fully visible, in normal position)
+    // transition = how long and what easing the animation uses
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className={clsx(styles.card, {
+        [styles.saved]: saved,
+        [styles.luxury]: price > 300,
+        [styles.booked]: !available,
+        [styles.superhost]: superhost,
       })}
     >
-      {/* Image + Heart */}
-      <div className="card__image-wrapper">
-        <img src={img} alt={title} className="card__image" />
-        <button className="card__heart" onClick={onToggleSave}>
+      {/* Image + Heart Button */}
+      <div className={styles.imageWrapper}>
+        <img src={img} alt={title} className={styles.image} />
+        <button className={styles.heart} onClick={onToggleSave}>
+          {/* Swap icon based on saved state */}
           {saved ? <FaHeart /> : <FaRegHeart />}
         </button>
       </div>
 
-      {/* Body */}
-      <div className="card__body">
-        <h3 className="card__title">{title}</h3>
+      {/* Card Body */}
+      <div className={styles.body}>
+        <h3 className={styles.title}>{title}</h3>
 
-        <div className="card__location">
+        {/* Location with pin icon */}
+        <div className={styles.location}>
           <FaMapMarkerAlt />
           {location}
         </div>
 
-        <div className="card__meta">
-          <div className="card__rating">
+        {/* Rating and Price row */}
+        <div className={styles.meta}>
+          <div className={styles.rating}>
             <FaStar color="#ff385c" />
             {numeral(rating).format('0.00')}
           </div>
-          <div className="card__price">
+          <div className={styles.price}>
             {numeral(price).format('$0,0')}
             <span> / night</span>
           </div>
         </div>
 
-        {/* Tags */}
-        <div className="card__tags">
-          {superhost && <span className="badge badge--superhost">Superhost</span>}
-          {price > 300 && <span className="badge badge--luxury">Luxury</span>}
+        {/* Badges — only render when condition is true */}
+        <div className={styles.tags}>
+          {superhost && <span className={styles.superhostBadge}>Superhost</span>}
+          {price > 300 && <span className={styles.luxuryBadge}>Luxury</span>}
           {available ? (
-            <span className="badge badge--available">Available</span>
+            <span className={styles.availableBadge}>Available</span>
           ) : (
-            <span className="badge badge--booked">Booked</span>
+            <span className={styles.bookedBadge}>Booked</span>
           )}
         </div>
 
-        <div className="card__date">
+        {/* Formatted date using date-fns */}
+        <div className={styles.date}>
           Available from: {format(new Date(availableFrom), 'MMM dd, yyyy')}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

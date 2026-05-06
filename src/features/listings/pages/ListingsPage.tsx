@@ -1,33 +1,37 @@
-import { useState } from 'react';
-import { listings } from '../../../data/listings';
-import { Listing } from '../types';
+import { useMemo } from 'react';
+import { useStore } from '../../../store/StoreContext';
+import { useListings } from '../hooks/useListings';
+import { useFavorites } from '../hooks/useFavorites';
 import ListingCard from '../components/ListingCard';
 import SearchBar from '../components/SearchBar';
 import SavedBadge from '../components/SavedBadge';
+import Spinner from '../../../shared/components/Spinner';
 import './ListingsPage.css';
+import SavedListings from '../components/SavedListings';
 
 export default function ListingsPage() {
-  const [query, setQuery] = useState('');
-  const [saved, setSaved] = useState<number[]>([]);
-  const [savedOnly, setSavedOnly] = useState(false);
+  // Triggers the simulated async fetch on mount
+  // dispatches SET_LOADING and SET_LISTINGS into the store
+  useListings();
 
-  // Toggle a listing's saved state
-  const handleToggleSave = (id: number) => {
-    setSaved((prev) =>
-      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
-    );
-  };
+  // Read global state — no local state needed anymore
+  const { state } = useStore();
+  const { listings, loading, filter } = state;
 
-  // Derive filtered list — no extra state
-  const filtered: Listing[] = listings
-    .filter((listing) => {
-      const q = query.toLowerCase();
-      return (
+  // useFavorites reads saved from store and returns helpers
+  // no prop drilling — any component can call this hook
+  const { toggle, count, isSaved } = useFavorites();
+
+  // useMemo prevents recalculating the filtered list on every render
+  // only recalculates when listings or filter actually changes
+  const filtered = useMemo(() => {
+    const q = filter.toLowerCase();
+    return listings.filter(
+      (listing) =>
         listing.title.toLowerCase().includes(q) ||
         listing.location.toLowerCase().includes(q)
-      );
-    })
-    .filter((listing) => (savedOnly ? saved.includes(listing.id) : true));
+    );
+  }, [listings, filter]);
 
   return (
     <div className="listings-page">
@@ -36,43 +40,46 @@ export default function ListingsPage() {
         <h1 className="listings-title">Find your next stay</h1>
 
         <div className="listings-controls">
-          <SearchBar value={query} onChange={setQuery} />
+          {/* SearchBar now dispatches directly to store — no onChange prop */}
+          <SearchBar />
 
-          <button
-            className="toggle-btn"
-            onClick={() => setSavedOnly((prev) => !prev)}
-          >
-            {savedOnly ? 'Show All' : 'Saved Only'}
-          </button>
-
-          <SavedBadge count={saved.length} />
+          {/* SavedBadge reads count from useFavorites — no prop needed */}
+          <SavedBadge count={count} />
+          <SavedListings /> 
         </div>
       </div>
 
-      {/* Results count */}
-      <p className="listings-count">
-        {filtered.length} {filtered.length === 1 ? 'listing' : 'listings'} found
-      </p>
-
-      {/* Grid or Empty State */}
-      {filtered.length === 0 ? (
-        <div className="empty-state">
-          <p>No listings match your search.</p>
-          <button onClick={() => { setQuery(''); setSavedOnly(false); }}>
-            Clear filters
-          </button>
-        </div>
+      {/* Show spinner while the simulated fetch is running */}
+      {loading ? (
+        <Spinner />
       ) : (
-        <div className="listings-grid">
-          {filtered.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              saved={saved.includes(listing.id)}
-              onToggleSave={() => handleToggleSave(listing.id)}
-            />
-          ))}
-        </div>
+        <>
+          {/* Results count */}
+          <p className="listings-count">
+            {filtered.length}{' '}
+            {filtered.length === 1 ? 'listing' : 'listings'} found
+          </p>
+
+          {/* Empty state when nothing matches the search */}
+          {filtered.length === 0 ? (
+            <div className="empty-state">
+              <p>No listings match your search.</p>
+            </div>
+          ) : (
+            <div className="listings-grid">
+              {filtered.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  // Derive saved state from store — no saved array prop
+                  saved={isSaved(listing.id)}
+                  // Pass toggle with id and title for the toast message
+                  onToggleSave={() => toggle(listing.id, listing.title)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
