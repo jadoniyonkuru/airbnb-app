@@ -11,4 +11,6 @@ export type Action =
   | { type: 'SET_LISTINGS'; payload: Listing[] }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_FILTER'; payload: string }
-  | { type: 'TOGGLE_FAVORITE'; payload: number };
+  | { type: 'TOGGLE_FAVORITE'; payload: number }
+  // RESET clears filter and saved back to initial values
+  | { type: 'RESET' };

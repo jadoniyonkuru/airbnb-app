@@ -20,6 +20,10 @@ export function reducer(state: State, action: Action): State {
           : [...state.saved, action.payload],
       };
 
+    // RESET clears filter and saved — listings and loading stay untouched
+    case 'RESET':
+      return { ...state, filter: '', saved: [] };
+
     default:
       return state;
   }

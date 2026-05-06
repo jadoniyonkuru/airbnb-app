@@ -5,15 +5,16 @@ import { FaHeart, FaRegHeart, FaStar, FaMapMarkerAlt } from 'react-icons/fa';
 import numeral from 'numeral';
 import { Listing } from '../types';
 import styles from './ListingCard.module.css';
+import { useNavigate } from 'react-router-dom';
 
 interface ListingCardProps {
   listing: Listing;
   saved: boolean;
   onToggleSave: () => void;
 }
-
 export default function ListingCard({ listing, saved, onToggleSave }: ListingCardProps) {
   const { title, location, price, rating, superhost, available, availableFrom, img } = listing;
+  const navigate = useNavigate();
 
   return (
     // motion.div replaces plain div — framer-motion handles the animation
@@ -21,20 +22,30 @@ export default function ListingCard({ listing, saved, onToggleSave }: ListingCar
     // animate = end state (fully visible, in normal position)
     // transition = how long and what easing the animation uses
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className={clsx(styles.card, {
-        [styles.saved]: saved,
-        [styles.luxury]: price > 300,
-        [styles.booked]: !available,
-        [styles.superhost]: superhost,
-      })}
-    >
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4, ease: 'easeOut' }}
+  onClick={() => navigate(`/listings/${listing.id}`)}
+  className={clsx(styles.card, {
+    [styles.saved]: saved,
+    [styles.luxury]: price > 300,
+    [styles.booked]: !available,
+    [styles.superhost]: superhost,
+  })}
+  style={{ cursor: 'pointer' }}
+>
       {/* Image + Heart Button */}
       <div className={styles.imageWrapper}>
         <img src={img} alt={title} className={styles.image} />
-        <button className={styles.heart} onClick={onToggleSave}>
+        <button
+  className={styles.heart}
+  onClick={(e) => {
+    // stopPropagation prevents the card click from firing
+    // when the heart button is clicked
+    e.stopPropagation();
+    onToggleSave();
+  }}
+>
           {/* Swap icon based on saved state */}
           {saved ? <FaHeart /> : <FaRegHeart />}
         </button>
