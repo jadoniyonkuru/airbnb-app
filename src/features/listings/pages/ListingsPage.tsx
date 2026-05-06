@@ -46,12 +46,12 @@ export default function ListingsPage() {
   return (
     <div className="listings-page">
       <div className="listings-header">
-        <h1 className="listings-title">Find your next stay</h1>
-        <div className="listings-controls">
-          <SearchBar />
-          <SavedBadge count={count} />
-          <SavedListings />
-        </div>
+      <h1 className="listings-title">Find your next stay</h1>
+      <div className="listings-controls">
+      <SearchBar />
+      <SavedBadge count={count} />
+      <SavedListings />
+      </div>
       </div>
 
       {loading ? (
@@ -59,29 +59,29 @@ export default function ListingsPage() {
       ) : (
         <>
           <p className="listings-count">
-            {filtered.length}{' '}
-            {filtered.length === 1 ? 'listing' : 'listings'} found
-          </p>
+    {filtered.length}{' '}
+    {filtered.length === 1 ? 'listing' : 'listings'} found
+     </p>
 
-          {filtered.length === 0 ? (
-            <div className="empty-state">
-              <p>No listings match your search.</p>
-            </div>
-          ) : (
-            // Fixed-height container — AutoSizer reads this to give FixedSizeList its dimensions
-            <div style={{ height: 'calc(100vh - 320px)', minHeight: '400px' }}>
-              <AutoSizer>
-                {({ height, width }) => {
-                  // Match the CSS grid: minmax(280px, 1fr) auto-fill
-                  const cols = Math.max(1, Math.floor((width + GAP) / (MIN_CARD_WIDTH + GAP)));
-                  const rowCount = Math.ceil(filtered.length / cols);
+    {filtered.length === 0 ? (
+    <div className="empty-state">
+    <p>No listings match your search.</p>
+    </div>
+    ) : (
+     // Fixed-height container — AutoSizer reads this to give FixedSizeList its dimensions
+  <div style={{ height: 'calc(100vh - 320px)', minHeight: '400px' }}>
+  <AutoSizer>
+   {({ height, width }) => {
+    // Match the CSS grid: minmax(280px, 1fr) auto-fill
+   const cols = Math.max(1, Math.floor((width + GAP) / (MIN_CARD_WIDTH + GAP)));
+    const rowCount = Math.ceil(filtered.length / cols);
 
-                  return (
-                    <List
-                      height={height}
-                      itemCount={rowCount}
-                      itemSize={CARD_HEIGHT + GAP}
-                      width={width}
+  return (
+  <List
+    height={height}
+    itemCount={rowCount}
+     itemSize={CARD_HEIGHT + GAP}
+     width={width}
                     >
                       {({ index, style }) => {
                         const start = index * cols;
