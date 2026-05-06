@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { StoreProvider } from './store/storeContext';
-import { AuthProvider } from './features/listings/auth/context/Authcontext';
+import { AuthProvider } from './features/auth/context/AuthContext';
 import App from './App';
 import './index.css';
 

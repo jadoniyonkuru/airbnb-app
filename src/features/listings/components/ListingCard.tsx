@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { format } from 'date-fns';
@@ -10,9 +11,10 @@ import { useNavigate } from 'react-router-dom';
 interface ListingCardProps {
   listing: Listing;
   saved: boolean;
-  onToggleSave: () => void;
+  onToggleSave: (id: number, title: string) => void;
 }
-export default function ListingCard({ listing, saved, onToggleSave }: ListingCardProps) {
+
+function ListingCard({ listing, saved, onToggleSave }: ListingCardProps) {
   const { title, location, price, rating, superhost, available, availableFrom, img } = listing;
   const navigate = useNavigate();
 
@@ -40,10 +42,8 @@ export default function ListingCard({ listing, saved, onToggleSave }: ListingCar
         <button
   className={styles.heart}
   onClick={(e) => {
-    // stopPropagation prevents the card click from firing
-    // when the heart button is clicked
     e.stopPropagation();
-    onToggleSave();
+    onToggleSave(listing.id, title);
   }}
 >
           {/* Swap icon based on saved state */}
@@ -92,3 +92,5 @@ export default function ListingCard({ listing, saved, onToggleSave }: ListingCar
     </motion.div>
   );
 }
+
+export default memo(ListingCard);

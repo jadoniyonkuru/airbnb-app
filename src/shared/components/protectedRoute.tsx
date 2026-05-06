@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../features/listings/auth/hooks/useAuth';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
