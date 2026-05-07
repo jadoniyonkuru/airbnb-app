@@ -2,13 +2,21 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { StoreProvider } from './store/storeContext';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import App from './App';
 import './index.css';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // data is fresh for 5 minutes before refetching
+      retry: 2,                  // retry failed requests twice before showing error
+    },
+  },
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +27,7 @@ createRoot(document.getElementById('root')!).render(
             <App />
             <Toaster position="bottom-right" />
           </StoreProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

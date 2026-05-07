@@ -1,7 +1,7 @@
 import { useBooking } from '../hooks/useBooking';
 import StepDates from './StepDates';
-import StepPersonal from './StepPayment';
-import StepPayment from './RealStepPayment';
+import StepPersonal from './StepPersonal';
+import StepPayment from './StepPayment';
 import StepConfirmation from './StepConfirmation';
 
 export default function BookingForm() {

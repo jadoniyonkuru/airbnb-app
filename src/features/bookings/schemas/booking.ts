@@ -19,9 +19,15 @@ export const personalSchema = z.object({
 });
 
 export const paymentSchema = z.object({
-  cardNumber: z.string().min(16, 'Card number must be 16 digits').max(16),
-  expiry: z.string().min(1, 'Expiry date is required'),
-  cvv: z.string().min(3, 'CVV must be 3 digits').max(4),
+  cardNumber: z
+    .string()
+    .regex(/^\d{16}$/, 'Card number must be exactly 16 digits'),
+  expiry: z
+    .string()
+    .regex(/^\d{2}\/\d{2}$/, 'Expiry must be in MM/YY format'),
+  cvv: z
+    .string()
+    .regex(/^\d{3}$/, 'CVV must be exactly 3 digits'),
   nameOnCard: z.string().min(1, 'Name on card is required'),
 });
 

@@ -1,77 +1,93 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { datesSchema, DatesFormData } from '../schemas/booking';
+import { personalSchema, PersonalFormData } from '../schemas/booking';
 
-interface StepDatesProps {
-  onNext: (data: DatesFormData) => void;
-  defaultValues?: Partial<DatesFormData>;
+interface StepPersonalProps {
+  onNext: (data: PersonalFormData) => void;
+  onBack: () => void;
+  defaultValues?: Partial<PersonalFormData>;
 }
 
-export default function StepDates({ onNext, defaultValues }: StepDatesProps) {
+export default function StepPersonal({ onNext, onBack, defaultValues }: StepPersonalProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<DatesFormData>({
-    // zodResolver connects react-hook-form with our Zod schema
-    // validation runs automatically on submit and field blur
-    resolver: zodResolver(datesSchema),
-    defaultValues: defaultValues || { guests: 1 },
+  } = useForm<PersonalFormData>({
+    resolver: zodResolver(personalSchema),
+    defaultValues,
   });
+
+  const [preview, setPreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState('');
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFileError('File must be under 5MB');
+      setPreview(null);
+      return;
+    }
+
+    setFileError('');
+    setPreview(URL.createObjectURL(file));
+  };
 
   return (
     <form onSubmit={handleSubmit(onNext)}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-        {/* Check-in date */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label htmlFor="checkIn" style={{ fontWeight: 600, color: '#222' }}>Check-in</label>
-          <input
-            id="checkIn"
-            type="date"
-            {...register('checkIn')}
-            style={inputStyle}
-          />
-          {/* Inline error — only renders when field has an error */}
-          {errors.checkIn && (
-            <p style={errorStyle}>{errors.checkIn.message}</p>
+          <label style={{ fontWeight: 600, color: '#222' }}>First Name</label>
+          <input type="text" {...register('firstName')} placeholder="John" style={inputStyle} />
+          {errors.firstName && <p style={errorStyle}>{errors.firstName.message}</p>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontWeight: 600, color: '#222' }}>Last Name</label>
+          <input type="text" {...register('lastName')} placeholder="Doe" style={inputStyle} />
+          {errors.lastName && <p style={errorStyle}>{errors.lastName.message}</p>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontWeight: 600, color: '#222' }}>Email</label>
+          <input type="email" {...register('email')} placeholder="you@example.com" style={inputStyle} />
+          {errors.email && <p style={errorStyle}>{errors.email.message}</p>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontWeight: 600, color: '#222' }}>Phone</label>
+          <input type="tel" {...register('phone')} placeholder="+1 234 567 8900" style={inputStyle} />
+          {errors.phone && <p style={errorStyle}>{errors.phone.message}</p>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontWeight: 600, color: '#222' }}>Profile Photo (optional)</label>
+          <input type="file" accept="image/*" onChange={handleFile} style={{ fontSize: '0.9rem' }} />
+          {fileError && <p style={errorStyle}>{fileError}</p>}
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                marginTop: '8px',
+                border: '2px solid #ff385c',
+              }}
+            />
           )}
         </div>
 
-        {/* Check-out date */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label htmlFor="checkOut" style={{ fontWeight: 600, color: '#222' }}>Check-out</label>
-          <input
-            id="checkOut"
-            type="date"
-            {...register('checkOut')}
-            style={inputStyle}
-          />
-          {/* This also shows the cross-field refine error from the schema */}
-          {errors.checkOut && (
-            <p style={errorStyle}>{errors.checkOut.message}</p>
-          )}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button type="button" onClick={onBack} style={backButtonStyle}>← Back</button>
+          <button type="submit" style={buttonStyle}>Continue →</button>
         </div>
-
-        {/* Guests */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label htmlFor="guests" style={{ fontWeight: 600, color: '#222' }}>Guests</label>
-          <input
-            id="guests"
-            type="number"
-            {...register('guests', { valueAsNumber: true })}
-            min={1}
-            max={16}
-            style={inputStyle}
-          />
-          {errors.guests && (
-            <p style={errorStyle}>{errors.guests.message}</p>
-          )}
-        </div>
-
-        <button type="submit" style={buttonStyle}>
-          Continue →
-        </button>
       </div>
     </form>
   );
@@ -85,13 +101,10 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
 };
 
-const errorStyle: React.CSSProperties = {
-  color: '#c0392b',
-  fontSize: '0.82rem',
-  margin: 0,
-};
+const errorStyle: React.CSSProperties = { color: '#c0392b', fontSize: '0.82rem', margin: 0 };
 
 const buttonStyle: React.CSSProperties = {
+  flex: 1,
   padding: '12px',
   borderRadius: '8px',
   background: '#ff385c',
@@ -100,5 +113,16 @@ const buttonStyle: React.CSSProperties = {
   fontWeight: 700,
   fontSize: '1rem',
   cursor: 'pointer',
-  marginTop: '8px',
+};
+
+const backButtonStyle: React.CSSProperties = {
+  flex: 1,
+  padding: '12px',
+  borderRadius: '8px',
+  background: '#fff',
+  color: '#222',
+  border: '1.5px solid #ddd',
+  fontWeight: 600,
+  fontSize: '1rem',
+  cursor: 'pointer',
 };
