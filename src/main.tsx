@@ -1,38 +1,26 @@
-import axios from 'axios';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { StoreProvider } from './store/storeContext';
+import { AuthProvider } from './features/auth/context/AuthContext';
+import App from './App';
+import './index.css';
 
-// Single shared axios instance — all API calls use this
-// baseURL comes from .env file — VITE_API_URL=https://your-api.com
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://jsonplaceholder.typicode.com',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const queryClient = new QueryClient();
 
-// REQUEST INTERCEPTOR — runs before every request
-// Reads token from localStorage and attaches it as Bearer token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    // Attach token so protected API routes recognize the user
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// RESPONSE INTERCEPTOR — runs after every response
-// Catches 401 Unauthorized — token expired or invalid
-api.interceptors.response.use(
-  // Pass successful responses through unchanged
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear invalid token and send user back to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <StoreProvider>
+            <App />
+            <Toaster position="bottom-right" />
+          </StoreProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </StrictMode>
 );
-
-export default api;
